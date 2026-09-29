@@ -1,0 +1,38 @@
+## Build
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rtifacts/
+
+## Visual Studio / Rider
+.vs/
+.idea/
+*.rsuser
+*.DotSettings.user
+
+## Secrets and local config
+.env
+.env.*
+*.pfx
+*.snk
+appsettings.*.local.json
+**/config.local.json
+
+## OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Test / capture scratch
+/tests/**/golden-frames/raw/
+/tmp/
+*.log
