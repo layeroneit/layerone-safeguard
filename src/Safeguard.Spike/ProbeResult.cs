@@ -7,8 +7,8 @@ internal sealed record ProbeResult(string Status, string Summary, string? Previe
     public static ProbeResult Ok(string summary, string? preview = null) =>
         new("OK", summary, preview);
 
-    public static ProbeResult Fail(string summary) =>
-        new("FAIL", summary, null);
+    public static ProbeResult Fail(string summary, string? preview = null) =>
+        new("FAIL", summary, preview);
 
     public static ProbeResult Skipped(string summary) =>
         new("SKIP", summary, null);

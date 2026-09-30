@@ -12,6 +12,7 @@ internal static class Program
         Console.WriteLine($"{Colors.ProductName} — M0 capture spike");
         Console.WriteLine(Colors.Publisher);
         Console.WriteLine("Disclosed · on-device · out-of-process only");
+        Console.WriteLine("Setup wizard is M2 — it is not in this spike.");
         Console.WriteLine();
 
         var discord = DiscordUiaProbe.Run();

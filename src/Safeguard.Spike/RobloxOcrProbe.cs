@@ -13,21 +13,29 @@ internal static class RobloxOcrProbe
 {
     public static async Task<ProbeResult> RunAsync()
     {
-        var process = ProcessFinder.FindFirst(ProcessFinder.RobloxNames);
-        if (process is null)
+        var windows = ProcessFinder.FindRoblox();
+        if (windows.Count == 0)
         {
-            return ProbeResult.Skipped("Roblox is not running with a visible window.");
+            return ProbeResult.Skipped("Roblox is not running with a top-level window.");
         }
 
-        var hwnd = process.MainWindowHandle;
+        var target = windows.FirstOrDefault(w => !NativeWindows.IsMinimized(w.Hwnd)) ?? windows[0];
+        var hwnd = target.Hwnd;
         if (hwnd == IntPtr.Zero)
         {
-            return ProbeResult.Fail($"Roblox PID {process.Id} has no main window handle.");
+            return ProbeResult.Fail($"Roblox PID {target.ProcessId} has no window handle.");
         }
 
-        if (IsIconic(hwnd))
+        if (NativeWindows.IsMinimized(hwnd))
         {
-            return ProbeResult.Fail("Roblox window is minimized. Restore it and run the spike again.");
+            NativeWindows.TryRestore(hwnd);
+            await Task.Delay(600);
+        }
+
+        if (NativeWindows.IsMinimized(hwnd))
+        {
+            return ProbeResult.Fail(
+                "Roblox is minimized and could not be restored. Click the Roblox window, then run again.");
         }
 
         try
@@ -54,12 +62,12 @@ internal static class RobloxOcrProbe
             if (string.IsNullOrWhiteSpace(text))
             {
                 return ProbeResult.Fail(
-                    $"Captured a {item.Size.Width}×{item.Size.Height} frame from Roblox (PID {process.Id}), but OCR returned no text. Open chat and retry.");
+                    $"Captured a {item.Size.Width}×{item.Size.Height} frame from Roblox (PID {target.ProcessId}), but OCR returned no text. Open chat and retry.");
             }
 
             var preview = text.Length > 600 ? text[..600] + "…" : text;
             return ProbeResult.Ok(
-                $"OCR read {text.Length} character(s) from Roblox (PID {process.Id}, {item.Size.Width}×{item.Size.Height}).",
+                $"OCR read {text.Length} character(s) from Roblox (PID {target.ProcessId}, {item.Size.Width}×{item.Size.Height}).",
                 preview);
         }
         catch (Exception ex)
@@ -121,9 +129,6 @@ internal static class RobloxOcrProbe
 
         return await tcs.Task;
     }
-
-    [DllImport("user32.dll")]
-    private static extern bool IsIconic(IntPtr hWnd);
 }
 
 internal static class Direct3DDeviceFactory

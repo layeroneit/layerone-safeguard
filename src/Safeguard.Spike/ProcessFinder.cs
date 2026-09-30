@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace LayerOne.Safeguard.Spike;
 
 internal static class ProcessFinder
@@ -17,21 +15,7 @@ internal static class ProcessFinder
         "RobloxPlayer"
     ];
 
-    public static Process? FindFirst(IEnumerable<string> names)
-    {
-        foreach (var name in names)
-        {
-            var match = Process.GetProcessesByName(name)
-                .FirstOrDefault(p => p.MainWindowHandle != IntPtr.Zero);
-            if (match is not null)
-            {
-                return match;
-            }
-        }
+    public static IReadOnlyList<WindowTarget> FindDiscord() => NativeWindows.Find(DiscordNames);
 
-        return Process.GetProcesses()
-            .FirstOrDefault(p =>
-                names.Any(n => p.ProcessName.Equals(n, StringComparison.OrdinalIgnoreCase))
-                && p.MainWindowHandle != IntPtr.Zero);
-    }
+    public static IReadOnlyList<WindowTarget> FindRoblox() => NativeWindows.Find(RobloxNames);
 }

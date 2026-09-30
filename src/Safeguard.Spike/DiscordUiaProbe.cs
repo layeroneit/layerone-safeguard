@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Text;
-using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.UIA3;
@@ -11,46 +9,73 @@ internal static class DiscordUiaProbe
 {
     public static ProbeResult Run()
     {
-        var process = ProcessFinder.FindFirst(ProcessFinder.DiscordNames);
-        if (process is null)
+        var windows = ProcessFinder.FindDiscord();
+        if (windows.Count == 0)
         {
-            return ProbeResult.Skipped("Discord is not running with a visible window.");
+            return ProbeResult.Skipped("Discord is not running with a top-level window.");
         }
 
-        try
+        var errors = new List<string>();
+        foreach (var target in windows)
         {
-            using var automation = new UIA3Automation();
-            var app = Application.Attach(process);
-            var window = app.GetMainWindow(automation, TimeSpan.FromSeconds(8));
-            if (window is null)
+            try
             {
-                return ProbeResult.Fail($"Attached to PID {process.Id} but no main window was found.");
-            }
+                var result = ProbeWindow(target);
+                if (result.Passed)
+                {
+                    return result;
+                }
 
-            var chatRoot = FindChatRoot(window) ?? window;
-            var usedChatRoot = !ReferenceEquals(chatRoot, window);
-            var lines = CollectText(chatRoot);
-            if (lines.Count == 0)
+                errors.Add($"{Describe(target)}: {result.Summary}");
+            }
+            catch (Exception ex)
             {
-                return ProbeResult.Fail(
-                    "UIA attached, but no text nodes were found. Discord may need Accessibility enabled.");
+                errors.Add($"{Describe(target)}: {ex.GetType().Name}: {ex.Message}");
             }
+        }
 
-            if (!usedChatRoot)
+        return ProbeResult.Fail(
+            "Discord windows were found, but no chat text was readable from the accessibility tree.",
+            string.Join('\n', errors) + AccessibilityHint);
+    }
+
+    private static ProbeResult ProbeWindow(WindowTarget target)
+    {
+        using var automation = new UIA3Automation();
+        var root = automation.FromHandle(target.Hwnd);
+        if (root is null)
+        {
+            return ProbeResult.Fail("FromHandle returned no element.");
+        }
+
+        var lines = CollectRawText(root, automation);
+        var chatRoot = FindChatRoot(root);
+        if (chatRoot is not null)
+        {
+            var chatLines = CollectRawText(chatRoot, automation);
+            if (chatLines.Count > 0)
             {
-                return ProbeResult.Fail(
-                    $"UIA attached (PID {process.Id}) and found {lines.Count} chrome text node(s), but no Messages list. Open a channel and retry.");
+                lines = chatLines;
             }
+        }
 
-            var preview = string.Join('\n', lines.Take(12));
-            return ProbeResult.Ok(
-                $"Read {lines.Count} text node(s) from Discord Messages (PID {process.Id}).",
+        if (lines.Count == 0)
+        {
+            return ProbeResult.Fail(
+                "UIA attached, but the raw tree had no named nodes. Chromium accessibility is likely off.");
+        }
+
+        var preview = string.Join('\n', lines.Take(12));
+        if (chatRoot is null && !LooksLikeChat(lines))
+        {
+            return ProbeResult.Fail(
+                $"Read {lines.Count} chrome label(s), but no Messages list and no chat-like lines. Open a channel.",
                 preview);
         }
-        catch (Exception ex)
-        {
-            return ProbeResult.Fail($"Discord UIA failed: {ex.Message}");
-        }
+
+        return ProbeResult.Ok(
+            $"Read {lines.Count} text node(s) from Discord (PID {target.ProcessId}, \"{target.Title}\").",
+            preview);
     }
 
     private static AutomationElement? FindChatRoot(AutomationElement window)
@@ -69,59 +94,59 @@ internal static class DiscordUiaProbe
         }
     }
 
-    private static List<string> CollectText(AutomationElement root)
+    private static List<string> CollectRawText(AutomationElement root, UIA3Automation automation)
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var lines = new List<string>();
+        var walker = automation.TreeWalkerFactory.GetRawViewWalker();
+        Walk(walker, root, seen, lines, 0);
+        return lines;
+    }
 
-        AutomationElement[] nodes;
+    private static void Walk(
+        FlaUI.Core.ITreeWalker walker,
+        AutomationElement node,
+        HashSet<string> seen,
+        List<string> lines,
+        int depth)
+    {
+        if (depth > 30 || lines.Count >= 80)
+        {
+            return;
+        }
+
+        var text = ReadNode(node);
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            text = Collapse(text);
+            if (text.Length >= 2 && seen.Add(text))
+            {
+                lines.Add(text);
+            }
+        }
+
+        AutomationElement? child = null;
         try
         {
-            nodes = root.FindAllDescendants();
+            child = walker.GetFirstChild(node);
         }
-        catch (Exception)
+        catch
         {
-            return lines;
+            return;
         }
 
-        foreach (var node in nodes)
+        while (child is not null && lines.Count < 80)
         {
-            ControlType type;
+            Walk(walker, child, seen, lines, depth + 1);
             try
             {
-                type = node.ControlType;
+                child = walker.GetNextSibling(child);
             }
             catch
-            {
-                continue;
-            }
-
-            if (type is not (ControlType.Text or ControlType.ListItem or ControlType.Document
-                or ControlType.Edit or ControlType.Hyperlink))
-            {
-                continue;
-            }
-
-            var text = ReadNode(node);
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                continue;
-            }
-
-            text = Collapse(text);
-            if (text.Length < 2 || !seen.Add(text))
-            {
-                continue;
-            }
-
-            lines.Add(text);
-            if (lines.Count >= 80)
             {
                 break;
             }
         }
-
-        return lines;
     }
 
     private static string ReadNode(AutomationElement node)
@@ -144,12 +169,36 @@ internal static class DiscordUiaProbe
 
         try
         {
+            if (node.Patterns.LegacyIAccessible.IsSupported)
+            {
+                var legacy = node.Patterns.LegacyIAccessible.Pattern.Name;
+                if (!string.IsNullOrWhiteSpace(legacy))
+                {
+                    return legacy;
+                }
+            }
+        }
+        catch
+        {
+            // Fall through to Name.
+        }
+
+        try
+        {
             return node.Name ?? string.Empty;
         }
         catch
         {
             return string.Empty;
         }
+    }
+
+    private static bool LooksLikeChat(IReadOnlyList<string> lines)
+    {
+        return lines.Any(line =>
+            line.Contains("Today at", StringComparison.OrdinalIgnoreCase)
+            || line.Contains("Yesterday at", StringComparison.OrdinalIgnoreCase)
+            || (line.Length >= 24 && line.Contains(' ')));
     }
 
     private static string Collapse(string text)
@@ -176,4 +225,11 @@ internal static class DiscordUiaProbe
         var result = builder.ToString();
         return result.Length > 240 ? result[..240] + "…" : result;
     }
+
+    private static string Describe(WindowTarget target) =>
+        $"PID {target.ProcessId} \"{target.Title}\" [{target.ClassName}]";
+
+    private const string AccessibilityHint =
+        "\nIf the tree is empty, fully quit Discord (tray too) and start it with " +
+        "--force-renderer-accessibility, then open a text channel.";
 }
