@@ -61,7 +61,27 @@
 
                 <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
                     <StackPanel>
-                        <TextBlock Text="2. App password" FontWeight="SemiBold" Foreground="#1A1033"/>
+                        <TextBlock Text="2. How should Safeguard send?" FontWeight="SemiBold" Foreground="#1A1033"/>
+                        <RadioButton x:Name="OutlookRadio" GroupName="Method" Margin="0,10,0,0" Checked="Method_Changed">
+                            <StackPanel>
+                                <TextBlock Text="Use Outlook on this computer" Foreground="#1A1033"/>
+                                <TextBlock x:Name="OutlookHint" FontSize="13" Foreground="#5C5670" TextWrapping="Wrap"
+                                           Text="No password needed. Best for work and Microsoft 365 email."/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="SmtpRadio" GroupName="Method" Margin="0,10,0,0" Checked="Method_Changed">
+                            <StackPanel>
+                                <TextBlock Text="Use an app password" Foreground="#1A1033"/>
+                                <TextBlock FontSize="13" Foreground="#5C5670" TextWrapping="Wrap"
+                                           Text="For Gmail, Yahoo, iCloud, and other home email."/>
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="PasswordCard" Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="App password" FontWeight="SemiBold" Foreground="#1A1033"/>
                         <TextBlock x:Name="PasswordHelp" Margin="0,4,0,8" FontSize="14" Foreground="#5C5670" TextWrapping="Wrap"
                                    Text="Most email services need an app password here, not your normal password."/>
                         <PasswordBox x:Name="PasswordBox" Padding="8,6" PasswordChanged="Input_Changed"/>
@@ -79,7 +99,7 @@
                     </StackPanel>
                 </Border>
 
-                <Expander Header="More settings (only if your email is not Gmail, Outlook, Yahoo, or iCloud)"
+                <Expander x:Name="MoreSettings" Header="More settings (only if your email is not Gmail, Outlook, Yahoo, or iCloud)"
                           FontSize="14" Foreground="#5C5670" Margin="0,0,0,14">
                     <Border Background="White" CornerRadius="10" Padding="18" Margin="0,8,0,0">
                         <StackPanel>

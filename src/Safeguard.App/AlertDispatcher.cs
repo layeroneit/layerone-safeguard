@@ -82,6 +82,21 @@ public sealed class AlertDispatcher
     private async Task SendAsync(AlertCopy copy)
     {
         var mail = _settings.Mail;
+        if (mail.UsesOutlook)
+        {
+            try
+            {
+                await OutlookSender.SendAsync(mail.Address, mail.AlsoSendToList(), copy);
+                LastProblem = null;
+            }
+            catch (Exception ex)
+            {
+                LastProblem = MailSender.Explain(ex);
+            }
+
+            return;
+        }
+
         var password = mail.TryGetPassword();
         if (password is null)
         {

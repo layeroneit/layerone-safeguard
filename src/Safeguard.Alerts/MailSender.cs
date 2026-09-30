@@ -126,6 +126,16 @@ public static class MailSender
             return "The email service did not accept the password. Most services need an app password here, not your normal one.";
         }
 
+        if (text.Contains("outlook"))
+        {
+            return ex.InnerException?.Message ?? ex.Message;
+        }
+
+        if (text.Contains("protocol violation"))
+        {
+            return "The mail server and Safeguard could not agree on how to connect. Work and Microsoft 365 addresses usually need \"Use Outlook on this computer\". Otherwise, try port 587.";
+        }
+
         if (text.Contains("timed out") || text.Contains("timeout"))
         {
             return "The email service did not answer in time. Check the internet connection and try again.";

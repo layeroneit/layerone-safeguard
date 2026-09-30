@@ -15,6 +15,7 @@ public partial class MailSetupWindow : Window
     private readonly AppSettings _settings;
     private string? _testedFingerprint;
     private bool _loading;
+    private bool _outlookOffered;
 
     public MailSetupWindow(AppSettings settings)
     {
@@ -28,6 +29,8 @@ public partial class MailSetupWindow : Window
         HostBox.Text = mail.Host;
         PortBox.Text = mail.Port.ToString();
         PasswordBox.Password = mail.TryGetPassword() ?? "";
+        OutlookRadio.IsChecked = mail.UsesOutlook;
+        SmtpRadio.IsChecked = !mail.UsesOutlook;
         _loading = false;
 
         if (mail.IsReady)
@@ -56,6 +59,16 @@ public partial class MailSetupWindow : Window
         Refresh();
     }
 
+    private void Method_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_loading)
+        {
+            Refresh();
+        }
+    }
+
+    private bool UseOutlook => OutlookRadio.IsChecked == true && OutlookRadio.IsEnabled;
+
     private void Input_Changed(object sender, RoutedEventArgs e)
     {
         if (!_loading)
@@ -80,11 +93,35 @@ public partial class MailSetupWindow : Window
             : "Not found in Windows or Outlook on this account. That is okay; the test email is what counts.";
         FoundText.Foreground = found is not null ? Good : Muted;
 
+        // Outlook sending only works when Outlook on this account has this mailbox.
+        var inOutlook = found is not null && found.StartsWith("Outlook", StringComparison.Ordinal) && OutlookSender.IsInstalled();
+        OutlookRadio.IsEnabled = inOutlook;
+        OutlookHint.Text = inOutlook
+            ? "No password needed. Outlook already has this mailbox. Best for work and Microsoft 365 email."
+            : "Only available when this mailbox is set up in Outlook on this computer.";
+        if (inOutlook && !_outlookOffered && !_settings.Mail.IsReady)
+        {
+            _outlookOffered = true;
+            OutlookRadio.IsChecked = true; // Suggest the no-password route the first time it is possible.
+        }
+
+        if (!inOutlook && OutlookRadio.IsChecked == true)
+        {
+            SmtpRadio.IsChecked = true;
+        }
+
+        var smtpVisibility = UseOutlook ? Visibility.Collapsed : Visibility.Visible;
+        PasswordCard.Visibility = smtpVisibility;
+        MoreSettings.Visibility = smtpVisibility;
+        ProviderText.Visibility = UseOutlook || ProviderText.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+        FoundText.Visibility = FoundText.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+
         var ready = IsEmail(address)
-                    && PasswordBox.Password.Length > 0
-                    && HostBox.Text.Trim().Length > 0
-                    && int.TryParse(PortBox.Text, out _)
-                    && AlsoListValid();
+                    && AlsoListValid()
+                    && (UseOutlook
+                        || (PasswordBox.Password.Length > 0
+                            && HostBox.Text.Trim().Length > 0
+                            && int.TryParse(PortBox.Text, out _)));
         TestButton.IsEnabled = ready;
 
         // Any change after a good test means test again.
@@ -101,17 +138,21 @@ public partial class MailSetupWindow : Window
         FinishButton.IsEnabled = false;
         Show(TestResult, "Sending…", Muted);
 
-        var account = new MailAccount(
-            AddressBox.Text.Trim(),
-            HostBox.Text.Trim(),
-            int.Parse(PortBox.Text),
-            PasswordBox.Password,
-            SplitAlso());
+        var address = AddressBox.Text.Trim();
         try
         {
-            await MailSender.SendAsync(account, MailSender.TestCopy());
+            if (UseOutlook)
+            {
+                await OutlookSender.SendAsync(address, SplitAlso(), MailSender.TestCopy());
+            }
+            else
+            {
+                var account = new MailAccount(address, HostBox.Text.Trim(), int.Parse(PortBox.Text), PasswordBox.Password, SplitAlso());
+                await MailSender.SendAsync(account, MailSender.TestCopy());
+            }
+
             _testedFingerprint = Fingerprint();
-            Show(TestResult, $"Sent. Check {account.Address} for “Safeguard notice: your test email”. Then press Finish.", Good);
+            Show(TestResult, $"Sent. Check {address} for “Safeguard notice: your test email”. Then press Finish.", Good);
         }
         catch (Exception ex)
         {
@@ -129,9 +170,17 @@ public partial class MailSetupWindow : Window
         var mail = _settings.Mail;
         mail.Address = AddressBox.Text.Trim();
         mail.AlsoSendTo = string.Join(", ", SplitAlso());
-        mail.Host = HostBox.Text.Trim();
-        mail.Port = int.Parse(PortBox.Text);
-        mail.SetPassword(PasswordBox.Password);
+        mail.Method = UseOutlook ? MailSettings.ViaOutlook : MailSettings.ViaSmtp;
+        if (UseOutlook)
+        {
+            mail.SealedPassword = ""; // Nothing to keep; Outlook signs in on its own.
+        }
+        else
+        {
+            mail.Host = HostBox.Text.Trim();
+            mail.Port = int.Parse(PortBox.Text);
+            mail.SetPassword(PasswordBox.Password);
+        }
         mail.TestedUtc = DateTimeOffset.UtcNow;
         mail.FoundOnAccount = MailboxCheck.FindOnThisAccount(mail.Address);
         _settings.MailSetupOffered = true;
@@ -149,8 +198,8 @@ public partial class MailSetupWindow : Window
     }
 
     private string Fingerprint() =>
-        string.Join('\u001f', AddressBox.Text.Trim(), HostBox.Text.Trim(), PortBox.Text.Trim(),
-            PasswordBox.Password, string.Join(',', SplitAlso()));
+        string.Join('\u001f', UseOutlook ? "outlook" : "smtp", AddressBox.Text.Trim(), HostBox.Text.Trim(), PortBox.Text.Trim(),
+            UseOutlook ? "" : PasswordBox.Password, string.Join(',', SplitAlso()));
 
     private List<string> SplitAlso() =>
         AlsoBox.Text.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();

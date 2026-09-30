@@ -12,6 +12,12 @@ public sealed class MailSettings
 {
     private static readonly byte[] Entropy = "LayerOne.Safeguard.Mail.v1"u8.ToArray();
 
+    public const string ViaOutlook = "Outlook";
+    public const string ViaSmtp = "Smtp";
+
+    /// <summary>Outlook = hand the email to classic Outlook on this PC (no password stored). Smtp = send directly.</summary>
+    public string Method { get; set; } = ViaSmtp;
+
     public string Address { get; set; } = "";
     public string AlsoSendTo { get; set; } = "";
     public string Host { get; set; } = "";
@@ -25,11 +31,14 @@ public sealed class MailSettings
     public string? FoundOnAccount { get; set; }
 
     [JsonIgnore]
+    public bool UsesOutlook => Method.Equals(ViaOutlook, StringComparison.OrdinalIgnoreCase);
+
+    [JsonIgnore]
     public bool IsReady =>
         TestedUtc is not null
         && !string.IsNullOrWhiteSpace(Address)
-        && !string.IsNullOrWhiteSpace(Host)
-        && !string.IsNullOrWhiteSpace(SealedPassword);
+        && (UsesOutlook
+            || (!string.IsNullOrWhiteSpace(Host) && !string.IsNullOrWhiteSpace(SealedPassword)));
 
     public IReadOnlyList<string> AlsoSendToList() =>
         AlsoSendTo.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

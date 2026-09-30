@@ -89,3 +89,14 @@ Dated entries for LayerOne App Safeguard. Publisher: Layer One IT Consultants LL
   "watching was turned off" email.
 - **Tray states.** Resting (no dot), watching (green), needs a look (amber), off (gray).
 - **Kids window.** Tray menu has "What is Safeguard? (for kids)" in child language.
+
+## 2026-09-29 — Send through Outlook when the mailbox is there
+
+- **Why.** First live test used a Microsoft 365 work mailbox. Password-based
+  SMTP failed ("protocol violation"); Microsoft is retiring basic-auth SMTP for
+  365. Classic Outlook on the same Windows account already had the mailbox.
+- **Rule.** If the parent's address is found in Outlook on this Windows account,
+  setup offers "Use Outlook on this computer" first. Safeguard hands the email
+  to Outlook over COM, from that account. No password is stored.
+- **Fallback.** App-password SMTP stays for Gmail, Yahoo, iCloud, and others.
+- **Later.** Microsoft sign-in (Graph) for 365 users without classic Outlook.
