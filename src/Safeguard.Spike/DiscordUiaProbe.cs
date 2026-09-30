@@ -27,21 +27,45 @@ internal static class DiscordUiaProbe
                 return ProbeResult.Fail($"Attached to PID {process.Id} but no main window was found.");
             }
 
-            var lines = CollectText(window);
+            var chatRoot = FindChatRoot(window) ?? window;
+            var usedChatRoot = !ReferenceEquals(chatRoot, window);
+            var lines = CollectText(chatRoot);
             if (lines.Count == 0)
             {
                 return ProbeResult.Fail(
                     "UIA attached, but no text nodes were found. Discord may need Accessibility enabled.");
             }
 
+            if (!usedChatRoot)
+            {
+                return ProbeResult.Fail(
+                    $"UIA attached (PID {process.Id}) and found {lines.Count} chrome text node(s), but no Messages list. Open a channel and retry.");
+            }
+
             var preview = string.Join('\n', lines.Take(12));
             return ProbeResult.Ok(
-                $"Read {lines.Count} text node(s) from Discord (PID {process.Id}).",
+                $"Read {lines.Count} text node(s) from Discord Messages (PID {process.Id}).",
                 preview);
         }
         catch (Exception ex)
         {
             return ProbeResult.Fail($"Discord UIA failed: {ex.Message}");
+        }
+    }
+
+    private static AutomationElement? FindChatRoot(AutomationElement window)
+    {
+        try
+        {
+            return window.FindFirstDescendant(cf =>
+                cf.ByName("Messages").And(cf.ByControlType(ControlType.List)))
+                ?? window.FindFirstDescendant(cf => cf.ByName("Messages"))
+                ?? window.FindFirstDescendant(cf =>
+                    cf.ByControlType(ControlType.List).And(cf.ByName("Message list")));
+        }
+        catch
+        {
+            return null;
         }
     }
 

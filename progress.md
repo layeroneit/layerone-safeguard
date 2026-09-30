@@ -2,7 +2,7 @@
 
 ## 2026-09-29
 
-Shipped: private-repo scaffold, locked decisions, Layer One brand tokens, and the M0 capture spike (Discord UIA + Roblox Graphics.Capture/OCR).
+Shipped: private-repo scaffold, locked decisions, Layer One brand tokens, and the M0 capture spike (Discord UIA + Roblox Graphics.Capture/OCR). Capture item GUID, free-threaded frame pool, and frame-copy-before-dispose are in so Roblox can return a real frame.
 
 Blockers: live Discord and Roblox must be open on this machine to prove the spike.
 

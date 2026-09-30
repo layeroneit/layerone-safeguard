@@ -34,13 +34,12 @@ internal static class RobloxOcrProbe
         {
             var item = GraphicsCaptureInterop.CreateItemForWindow(hwnd);
             using var device = Direct3DDeviceFactory.CreateDevice();
-            using var frame = await CaptureOneFrameAsync(item, device);
-            if (frame is null)
+            using var bitmap = await CaptureOneBitmapAsync(item, device);
+            if (bitmap is null)
             {
                 return ProbeResult.Fail("Graphics.Capture started, but no frame arrived within 8 seconds.");
             }
 
-            using var bitmap = await SoftwareBitmap.CreateCopyFromSurfaceAsync(frame.Surface);
             using var bgra = SoftwareBitmap.Convert(bitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
 
             var engine = OcrEngine.TryCreateFromUserProfileLanguages()
@@ -69,61 +68,58 @@ internal static class RobloxOcrProbe
         }
     }
 
-    private static Task<Direct3D11CaptureFrame?> CaptureOneFrameAsync(
+    private static async Task<SoftwareBitmap?> CaptureOneBitmapAsync(
         GraphicsCaptureItem item,
         IDirect3DDevice device)
     {
-        var tcs = new TaskCompletionSource<Direct3D11CaptureFrame?>(TaskCreationOptions.RunContinuationsAsynchronously);
-        Direct3D11CaptureFramePool? pool = null;
-        GraphicsCaptureSession? session = null;
+        var tcs = new TaskCompletionSource<SoftwareBitmap?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var pool = Direct3D11CaptureFramePool.CreateFreeThreaded(
+            device,
+            DirectXPixelFormat.B8G8R8A8UIntNormalized,
+            2,
+            item.Size);
 
-        void Cleanup()
+        pool.FrameArrived += (sender, _) =>
         {
-            try { session?.Dispose(); } catch { /* ignore */ }
-            try { pool?.Dispose(); } catch { /* ignore */ }
-        }
-
-        try
-        {
-            pool = Direct3D11CaptureFramePool.Create(
-                device,
-                DirectXPixelFormat.B8G8R8A8UIntNormalized,
-                2,
-                item.Size);
-
-            pool.FrameArrived += (sender, _) =>
+            if (tcs.Task.IsCompleted)
             {
-                try
+                return;
+            }
+
+            try
+            {
+                using var next = sender.TryGetNextFrame();
+                if (next is null)
                 {
-                    var next = sender.TryGetNextFrame();
-                    if (next is not null)
-                    {
-                        tcs.TrySetResult(next);
-                    }
+                    return;
                 }
-                catch (Exception ex)
+
+                var copy = SoftwareBitmap.CreateCopyFromSurfaceAsync(next.Surface)
+                    .AsTask()
+                    .GetAwaiter()
+                    .GetResult();
+                if (!tcs.TrySetResult(copy))
                 {
-                    tcs.TrySetException(ex);
+                    copy.Dispose();
                 }
-            };
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+        };
 
-            session = pool.CreateCaptureSession(item);
-            session.IsCursorCaptureEnabled = false;
-            session.StartCapture();
-        }
-        catch
+        using var session = pool.CreateCaptureSession(item);
+        session.IsCursorCaptureEnabled = false;
+        session.StartCapture();
+
+        var winner = await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(8)));
+        if (winner != tcs.Task)
         {
-            Cleanup();
-            throw;
+            tcs.TrySetResult(null);
         }
 
-        _ = Task.Delay(TimeSpan.FromSeconds(8)).ContinueWith(_ => tcs.TrySetResult(null));
-
-        return tcs.Task.ContinueWith(task =>
-        {
-            Cleanup();
-            return task.GetAwaiter().GetResult();
-        });
+        return await tcs.Task;
     }
 
     [DllImport("user32.dll")]
