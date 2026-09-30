@@ -75,7 +75,7 @@ dotnet test tests\Safeguard.Scoring.Tests
 
 ## Flagged log
 
-Only reads that score "needs a look" or higher are written, DPAPI-encrypted to the Windows account, one file per day under `%LOCALAPPDATA%\LayerOne\Safeguardlagged`, pruned after 30 days. View it from **Flagged log** in the main window.
+Only reads that score "needs a look" or higher are written, DPAPI-encrypted to the Windows account, one file per day under `%LOCALAPPDATA%\LayerOne\Safeguard\flagged`, pruned after 30 days. View it from **Flagged log** in the main window.
 
 ## Icons
 
