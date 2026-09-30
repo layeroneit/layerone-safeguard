@@ -11,9 +11,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FlaUI.UIA3" Version="5.0.0" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Safeguard.Brand\Safeguard.Brand.csproj" />
+    <ProjectReference Include="..\Safeguard.Capture\Safeguard.Capture.csproj" />
   </ItemGroup>
 </Project>

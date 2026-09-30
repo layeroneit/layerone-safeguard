@@ -36,3 +36,4 @@ Desktop.ini
 /tests/**/golden-frames/raw/
 /tmp/
 *.log
+tools/icon-preview.png

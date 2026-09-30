@@ -2,11 +2,10 @@ using System.Runtime.InteropServices;
 using Windows.Graphics.Capture;
 using WinRT;
 
-namespace LayerOne.Safeguard.Spike;
+namespace LayerOne.Safeguard.Capture;
 
 internal static class GraphicsCaptureInterop
 {
-    // WinRT IGraphicsCaptureItem. typeof(GraphicsCaptureItem).GUID is not this ID on .NET 8.
     private static readonly Guid GraphicsCaptureItemIid = new("79C3F95B-31F7-4EC2-A464-632EF5D30760");
     private static readonly Guid InteropIid = new("3628E81B-3CAC-4C60-B7F4-23CE0E0C3356");
 

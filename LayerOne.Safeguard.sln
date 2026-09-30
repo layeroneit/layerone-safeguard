@@ -1,10 +1,20 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Safeguard.Brand", "src\Safeguard.Brand\Safeguard.Brand.csproj", "{A1B2C3D4-E5F6-7890-ABCD-000000000001}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Safeguard.Spike", "src\Safeguard.Spike\Safeguard.Spike.csproj", "{A1B2C3D4-E5F6-7890-ABCD-000000000002}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Safeguard.Alerts", "src\Safeguard.Alerts\Safeguard.Alerts.csproj", "{A1B2C3D4-E5F6-7890-ABCD-000000000006}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D5607E15-6F0B-4E95-9D0D-F6D020FF7403}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Safeguard.Capture", "src\Safeguard.Capture\Safeguard.Capture.csproj", "{3B476CC8-E974-4DA0-B090-08376F8055A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Safeguard.Core", "src\Safeguard.Core\Safeguard.Core.csproj", "{DBBA72B2-3111-4FBE-AE3E-415CED289848}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Safeguard.App", "src\Safeguard.App\Safeguard.App.csproj", "{B9E40F2F-7624-4C52-A52F-F69242D1D034}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,5 +30,26 @@ Global
 		{A1B2C3D4-E5F6-7890-ABCD-000000000002}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1B2C3D4-E5F6-7890-ABCD-000000000002}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1B2C3D4-E5F6-7890-ABCD-000000000002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-000000000006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-000000000006}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-000000000006}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-000000000006}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B476CC8-E974-4DA0-B090-08376F8055A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B476CC8-E974-4DA0-B090-08376F8055A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B476CC8-E974-4DA0-B090-08376F8055A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B476CC8-E974-4DA0-B090-08376F8055A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBBA72B2-3111-4FBE-AE3E-415CED289848}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBBA72B2-3111-4FBE-AE3E-415CED289848}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBBA72B2-3111-4FBE-AE3E-415CED289848}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBBA72B2-3111-4FBE-AE3E-415CED289848}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9E40F2F-7624-4C52-A52F-F69242D1D034}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9E40F2F-7624-4C52-A52F-F69242D1D034}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9E40F2F-7624-4C52-A52F-F69242D1D034}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9E40F2F-7624-4C52-A52F-F69242D1D034}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3B476CC8-E974-4DA0-B090-08376F8055A6} = {D5607E15-6F0B-4E95-9D0D-F6D020FF7403}
+		{DBBA72B2-3111-4FBE-AE3E-415CED289848} = {D5607E15-6F0B-4E95-9D0D-F6D020FF7403}
+		{B9E40F2F-7624-4C52-A52F-F69242D1D034} = {D5607E15-6F0B-4E95-9D0D-F6D020FF7403}
 	EndGlobalSection
 EndGlobal

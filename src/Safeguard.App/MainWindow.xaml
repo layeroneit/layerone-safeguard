@@ -1,0 +1,135 @@
+<Window x:Class="LayerOne.Safeguard.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Safeguard"
+        Icon="pack://application:,,,/Assets/icon/app.ico"
+        Width="640"
+        Height="780"
+        MinWidth="520"
+        MinHeight="560"
+        WindowStartupLocation="CenterScreen"
+        Background="#F6F4F8"
+        FontFamily="Segoe UI"
+        FontSize="16"
+        Closing="Window_Closing">
+    <DockPanel Margin="24">
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
+            <Button x:Name="ToggleWatchButton"
+                Style="{StaticResource PrimaryButton}"
+                    Height="46"
+                    FontSize="17"
+                    FontWeight="SemiBold"
+                    Background="#3A2081"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Click="ToggleWatch_Click"
+                    Content="Turn watching off"/>
+            <TextBlock x:Name="StartupLabel"
+                       Margin="0,10,0,0"
+                       FontSize="13"
+                       Foreground="#5C5670"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
+        <ScrollViewer>
+            <StackPanel>
+                <DockPanel Margin="0,0,0,16">
+                    <Image Source="pack://application:,,,/Assets/icon/app-256.png"
+                           Width="52"
+                           Height="52"
+                           DockPanel.Dock="Left"
+                           Margin="0,0,14,0"
+                           VerticalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Safeguard" FontSize="26" FontWeight="Bold" Foreground="#1A1033"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                            <TextBlock Text="from" Foreground="#5C5670" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <Image Source="pack://application:,,,/Assets/logo/layer-one.png"
+                                   Height="14"
+                                   VerticalAlignment="Center"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   ToolTip="Layer One IT Consultants LLC"/>
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock x:Name="HeadlineText"
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   Foreground="#3A2081"
+                                   TextWrapping="Wrap"
+                                   Text="Safeguard is starting…"/>
+                        <TextBlock x:Name="DetailText"
+                                   Margin="0,8,0,0"
+                                   Foreground="#1A1033"
+                                   TextWrapping="Wrap"
+                                   Text="Getting ready."/>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <DockPanel>
+                            <CheckBox x:Name="DiscordBox"
+                                      DockPanel.Dock="Right"
+                                      VerticalAlignment="Center"
+                                      Checked="DiscordBox_Changed"
+                                      Unchecked="DiscordBox_Changed"/>
+                            <TextBlock Text="Discord" FontWeight="SemiBold" Foreground="#1A1033"/>
+                        </DockPanel>
+                        <TextBlock x:Name="DiscordStatus"
+                                   Margin="0,6,0,0"
+                                   Foreground="#5C5670"
+                                   TextWrapping="Wrap"
+                                   Text="Checking…"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <DockPanel>
+                            <CheckBox x:Name="RobloxBox"
+                                      DockPanel.Dock="Right"
+                                      VerticalAlignment="Center"
+                                      Checked="RobloxBox_Changed"
+                                      Unchecked="RobloxBox_Changed"/>
+                            <TextBlock Text="Roblox" FontWeight="SemiBold" Foreground="#1A1033"/>
+                        </DockPanel>
+                        <TextBlock x:Name="RobloxStatus"
+                                   Margin="0,6,0,0"
+                                   Foreground="#5C5670"
+                                   TextWrapping="Wrap"
+                                   Text="Checking…"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="Your child's usernames" FontWeight="SemiBold" Foreground="#1A1033"/>
+                        <TextBlock Margin="0,6,0,12"
+                                   Foreground="#5C5670"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   Text="Optional. Type the names if you want. Leave blank to watch Discord and Roblox as they are today. Using only those names comes later."/>
+                        <TextBlock Text="Discord username" Foreground="#1A1033" FontSize="14"/>
+                        <TextBox x:Name="DiscordNameBox"
+                                 Margin="0,4,0,12"
+                                 Padding="8,6"
+                                 LostFocus="Username_LostFocus"/>
+                        <TextBlock Text="Roblox username" Foreground="#1A1033" FontSize="14"/>
+                        <TextBox x:Name="RobloxNameBox"
+                                 Margin="0,4,0,0"
+                                 Padding="8,6"
+                                 LostFocus="Username_LostFocus"/>
+                    </StackPanel>
+                </Border>
+                <TextBlock Text="Last text it saw" FontWeight="SemiBold" Foreground="#1A1033" Margin="0,4,0,6"/>
+                <Border Background="White" CornerRadius="10" Padding="16">
+                    <TextBlock x:Name="LastText"
+                               Foreground="#5C5670"
+                               TextWrapping="Wrap"
+                               FontSize="14"
+                               Text="Nothing yet. Open Discord or Roblox."/>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

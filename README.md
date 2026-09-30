@@ -53,6 +53,16 @@ Safeguard is a Layer One production. UI uses the Layer One palette in
 - **M4** Family beta
 - **M5** Installer package
 
+## Parent app (Windows)
+
+```powershell
+dotnet run --project src\Safeguard.App\Safeguard.App.csproj
+```
+
+A simple window and a tray icon. First run asks you to accept the AS-IS notice. After that, Safeguard starts when you sign in. It rests until Discord or Roblox is open. Closing the window hides it to the tray; use Quit in the tray menu to stop.
+
+Mail setup (the rest of the wizard) is still next.
+
 ## M0 spike
 
 ```powershell

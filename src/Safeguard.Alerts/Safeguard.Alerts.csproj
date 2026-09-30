@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>LayerOne.Safeguard.Alerts</RootNamespace>
+    <AssemblyName>Safeguard.Alerts</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Safeguard.Brand\Safeguard.Brand.csproj" />
+  </ItemGroup>
+</Project>

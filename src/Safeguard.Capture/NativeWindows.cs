@@ -2,14 +2,44 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace LayerOne.Safeguard.Spike;
+namespace LayerOne.Safeguard.Capture;
 
-internal sealed record WindowTarget(int ProcessId, string ProcessName, IntPtr Hwnd, string Title, string ClassName);
-
-internal static class NativeWindows
+public static class NativeWindows
 {
-    private const int SwRestore = 9;
     private const int MaxTitle = 512;
+
+    public static readonly string[] DiscordProcessNames =
+    [
+        "Discord",
+        "DiscordPTB",
+        "DiscordCanary"
+    ];
+
+    public static readonly string[] RobloxProcessNames =
+    [
+        "RobloxPlayerBeta",
+        "RobloxPlayer"
+    ];
+
+    public static IReadOnlyList<WindowTarget> FindDiscord() => Find(DiscordProcessNames);
+
+    public static IReadOnlyList<WindowTarget> FindRoblox() => Find(RobloxProcessNames);
+
+    public static bool AnyProcess(IEnumerable<string> processNames)
+    {
+        var names = new HashSet<string>(processNames, StringComparer.OrdinalIgnoreCase);
+        return Process.GetProcesses().Any(p =>
+        {
+            try
+            {
+                return names.Contains(p.ProcessName);
+            }
+            catch
+            {
+                return false;
+            }
+        });
+    }
 
     public static IReadOnlyList<WindowTarget> Find(IEnumerable<string> processNames)
     {
@@ -49,10 +79,12 @@ internal static class NativeWindows
                 return true;
             }
 
-            var title = GetTitle(hwnd);
-            var className = GetClass(hwnd);
-            var processName = SafeProcessName((int)pid);
-            found.Add(new WindowTarget((int)pid, processName, hwnd, title, className));
+            found.Add(new WindowTarget(
+                (int)pid,
+                SafeProcessName((int)pid),
+                hwnd,
+                GetTitle(hwnd),
+                GetClass(hwnd)));
             return true;
         }, IntPtr.Zero);
 
@@ -60,18 +92,6 @@ internal static class NativeWindows
             .OrderByDescending(w => !NativeIsIconic(w.Hwnd))
             .ThenByDescending(w => w.Title.Length)
             .ToList();
-    }
-
-    public static bool TryRestore(IntPtr hwnd)
-    {
-        if (hwnd == IntPtr.Zero)
-        {
-            return false;
-        }
-
-        NativeShowWindow(hwnd, SwRestore);
-        NativeSetForegroundWindow(hwnd);
-        return !NativeIsIconic(hwnd);
     }
 
     public static bool IsMinimized(IntPtr hwnd) => hwnd != IntPtr.Zero && NativeIsIconic(hwnd);
@@ -122,12 +142,6 @@ internal static class NativeWindows
 
     [DllImport("user32.dll", EntryPoint = "IsIconic")]
     private static extern bool NativeIsIconic(IntPtr hWnd);
-
-    [DllImport("user32.dll", EntryPoint = "ShowWindow")]
-    private static extern bool NativeShowWindow(IntPtr hWnd, int nCmdShow);
-
-    [DllImport("user32.dll", EntryPoint = "SetForegroundWindow")]
-    private static extern bool NativeSetForegroundWindow(IntPtr hWnd);
 
     [DllImport("user32.dll", EntryPoint = "GetWindow")]
     private static extern IntPtr NativeGetWindow(IntPtr hWnd, uint uCmd);
