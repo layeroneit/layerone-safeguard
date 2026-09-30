@@ -94,6 +94,20 @@ public partial class MainWindow : Window
         UpdateNeedsLook(Array.Empty<FlaggedItem>());
     }
 
+    private void TestAlert_Click(object sender, RoutedEventArgs e)
+    {
+        var item = _monitor.RunTestAlert();
+        UpdateNeedsLook(_monitor.Snapshot.NeedsLook);
+        var where = _settings.Mail.IsReady
+            ? $"An email is on its way to {_settings.Mail.Address}."
+            : "Email is not set up yet, so no email was sent. Set up email to get one.";
+        MessageBox.Show(this,
+            item is null
+                ? "The test did not flag. Please tell Layer One; this should not happen."
+                : $"Test alert sent. It is at the top of Needs a look and in the Flagged log. {where}",
+            "Safeguard", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
     private void OpenLog_Click(object sender, RoutedEventArgs e)
     {
         new FlagLogWindow(_monitor.FlagLog) { Owner = this }.ShowDialog();
@@ -177,9 +191,9 @@ internal sealed record NeedsLookRow(string Title, string When, string Snippet, s
     private static readonly Brush RiskBrush = (Brush)new BrushConverter().ConvertFrom(LayerOne.Safeguard.Brand.Colors.Risk)!;
 
     public static NeedsLookRow From(FlaggedItem item) => new(
-        item.IsRisk ? $"Please look soon: {item.Label}" : char.ToUpper(item.Label[0]) + item.Label[1..],
+        (item.IsTest ? "Test: " : "") + (item.IsRisk ? $"Please look soon: {item.Label}" : char.ToUpper(item.Label[0]) + item.Label[1..]),
         $"{item.App} · {item.Time.ToLocalTime():ddd h:mm tt}",
-        $"“{item.Snippet}”",
+        $"“{item.Snippet}”   " + string.Join(" ", item.FlaggedWords().Select(w => $"[{w}]")),
         item.TalkItOver,
         item.IsRisk ? RiskBrush : ReviewBrush);
 }

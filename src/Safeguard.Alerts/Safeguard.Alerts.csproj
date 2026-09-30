@@ -9,4 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Safeguard.Brand\Safeguard.Brand.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\assets\icon\app-96.png" LogicalName="safeguard-logo.png" />
+  </ItemGroup>
 </Project>

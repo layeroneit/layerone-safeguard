@@ -1,4 +1,3 @@
-using System.Text;
 using LayerOne.Safeguard.Brand;
 
 namespace LayerOne.Safeguard.Alerts;
@@ -16,7 +15,6 @@ public static class AlertCopyWriter
 
         var app = AppLabel(message.AppName);
         var about = OptionalLine(message.Category);
-        var snippet = ShortSnippet(message.Snippet);
         var when = message.Time.ToLocalTime().ToString("dddd, MMMM d, yyyy 'at' h:mm tt");
 
         var subject = about is null
@@ -27,55 +25,41 @@ public static class AlertCopyWriter
             subject = subject.Replace($"{Colors.ShortName} notice:", $"{Colors.ShortName} notice (please look soon):");
         }
 
-        var body = new StringBuilder();
-        body.AppendLine("Hello,");
-        body.AppendLine();
-        body.Append("Safeguard spotted something in ");
-        body.Append(app);
-        body.AppendLine(" that you may want to look at.");
-        body.AppendLine();
-        body.Append("When: ");
-        body.AppendLine(when);
-        body.Append("App: ");
-        body.AppendLine(app);
-        if (about is not null)
+        if (message.IsTest)
         {
-            body.Append("About: ");
-            body.AppendLine(about);
+            subject = subject.Replace($"{Colors.ShortName} notice", $"{Colors.ShortName} notice (test)");
         }
 
-        body.AppendLine();
-        body.AppendLine("Here is a short piece of what was said:");
-        body.AppendLine();
-        body.Append('"');
-        body.Append(snippet);
-        body.AppendLine("\"");
-        body.AppendLine();
+        var email = new EmailBuilder().Paragraph("Hello,");
+        if (message.IsTest)
+        {
+            email.Callout("This is a test alert",
+                "You started this from the Safeguard window. No one said this in Discord or Roblox. This is what a real alert looks like.",
+                Colors.SecondaryText);
+        }
+
+        email
+            .Paragraph($"Safeguard spotted something in {app} that you may want to look at.")
+            .Facts(("When", when), ("App", app), ("About", about))
+            .FlaggedWords(message.FlaggedWords)
+            .Paragraph("Here is a short piece of what was said:")
+            .Quote(ShortSnippet(message.Snippet));
+
         var tip = OptionalLine(message.TalkItOver);
         if (tip is not null)
         {
-            body.AppendLine("A calm way to bring it up:");
-            body.AppendLine(tip);
-            body.AppendLine();
+            email.Callout("A calm way to bring it up:", tip, Colors.Primary);
         }
 
         if (message.Urgent)
         {
-            body.AppendLine("Safeguard saw more than one warning sign together. If you think your child is in danger right now, call 911.");
-            body.AppendLine();
+            email.Callout("Please look soon",
+                "Safeguard saw more than one warning sign together. If you think your child is in danger right now, call 911.",
+                Colors.Risk);
         }
 
-        body.AppendLine("Safeguard only sends a notice. It does not block or delete anything. You decide what to do next.");
-        body.AppendLine();
-        body.AppendLine(Colors.ShortName);
-        body.Append(Colors.Publisher);
-
-        return new AlertCopy
-        {
-            FromDisplayName = FromDisplayName,
-            Subject = subject,
-            Body = body.ToString()
-        };
+        email.Paragraph("Safeguard only sends a notice. It does not block or delete anything. You decide what to do next.");
+        return email.Build(subject);
     }
 
     private static string AppLabel(string? appName)
@@ -99,15 +83,8 @@ public static class AlertCopyWriter
         return trimmed;
     }
 
-    private static string? OptionalLine(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        return value.Trim();
-    }
+    private static string? OptionalLine(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static string ShortSnippet(string? snippet)
     {
@@ -118,11 +95,6 @@ public static class AlertCopyWriter
 
         var text = snippet.Trim();
         const int max = 280;
-        if (text.Length <= max)
-        {
-            return text;
-        }
-
-        return text[..(max - 1)].TrimEnd() + "…";
+        return text.Length <= max ? text : text[..(max - 1)].TrimEnd() + "…";
     }
 }

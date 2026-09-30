@@ -34,12 +34,12 @@ public partial class FlagLogWindow : Window
         var text = new StringBuilder();
         foreach (var item in items)
         {
-            text.AppendLine($"{item.Time.ToLocalTime():yyyy-MM-dd h:mm:ss tt}  {item.App}  {item.Level.ToUpperInvariant()} (score {item.Score})");
+            text.AppendLine($"{item.Time.ToLocalTime():yyyy-MM-dd h:mm:ss tt}  {item.App}  {item.Level.ToUpperInvariant()} (score {item.Score}){(item.IsTest ? "  [TEST]" : "")}");
             text.AppendLine($"About: {item.Label}");
             foreach (var line in item.Lines)
             {
                 text.AppendLine($"  [{line.Category}] {line.Line}");
-                text.AppendLine($"      matched: {line.Phrase}");
+                text.AppendLine($"      flagged: [{(string.IsNullOrWhiteSpace(line.Matched) ? line.Phrase : line.Matched)}]  (rule: {line.Phrase})");
             }
 
             text.AppendLine("  What was on screen:");

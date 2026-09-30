@@ -67,6 +67,18 @@ public static class MailSender
             Body = copy.Body,
             IsBodyHtml = false
         };
+        if (!string.IsNullOrWhiteSpace(copy.HtmlBody))
+        {
+            // Plain text stays the main body; HTML with the inline logo is the richer view.
+            var html = AlternateView.CreateAlternateViewFromString(copy.HtmlBody, System.Text.Encoding.UTF8, "text/html");
+            var logo = new LinkedResource(new MemoryStream(EmailBuilder.LogoPng()), "image/png")
+            {
+                ContentId = EmailBuilder.LogoContentId
+            };
+            html.LinkedResources.Add(logo);
+            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(copy.Body, System.Text.Encoding.UTF8, "text/plain"));
+            message.AlternateViews.Add(html);
+        }
         message.To.Add(account.Address);
         foreach (var extra in account.AlsoSendTo.Where(a => !string.IsNullOrWhiteSpace(a)))
         {
@@ -86,36 +98,18 @@ public static class MailSender
     }
 
     /// <summary>The test email the setup step sends before it lets the parent finish.</summary>
-    public static AlertCopy TestCopy() => new()
-    {
-        FromDisplayName = Colors.ProductName,
-        Subject = $"{Colors.ShortName} notice: your test email",
-        Body = string.Join(Environment.NewLine,
-            "Hello,",
-            "",
-            "This is a test from Safeguard. If you can read this, alerts will reach you.",
-            "",
-            "Safeguard only sends a notice when something in Discord or Roblox may need a look. It does not block or delete anything.",
-            "",
-            Colors.ShortName,
-            Colors.Publisher)
-    };
+    public static AlertCopy TestCopy() => new EmailBuilder()
+        .Paragraph("Hello,")
+        .Paragraph("This is a test from Safeguard. If you can read this, alerts will reach you.")
+        .Paragraph("Safeguard only sends a notice when something in Discord or Roblox may need a look. It does not block or delete anything.")
+        .Build($"{Colors.ShortName} notice: your test email");
 
     /// <summary>Sent once when watching is turned off, so a parent knows if it happens.</summary>
-    public static AlertCopy TurnedOffCopy(DateTimeOffset when) => new()
-    {
-        FromDisplayName = Colors.ProductName,
-        Subject = $"{Colors.ShortName} notice: watching was turned off",
-        Body = string.Join(Environment.NewLine,
-            "Hello,",
-            "",
-            $"Safeguard watching was turned off on this computer on {when.ToLocalTime():dddd, MMMM d 'at' h:mm tt}.",
-            "",
-            "If you did this, you can ignore this email. If not, open Safeguard from the tray and turn watching back on.",
-            "",
-            Colors.ShortName,
-            Colors.Publisher)
-    };
+    public static AlertCopy TurnedOffCopy(DateTimeOffset when) => new EmailBuilder()
+        .Paragraph("Hello,")
+        .Paragraph($"Safeguard watching was turned off on this computer on {when.ToLocalTime():dddd, MMMM d 'at' h:mm tt}.")
+        .Paragraph("If you did this, you can ignore this email. If not, open Safeguard from the tray and turn watching back on.")
+        .Build($"{Colors.ShortName} notice: watching was turned off");
 
     /// <summary>Turns a mail error into something a parent can act on.</summary>
     public static string Explain(Exception ex)

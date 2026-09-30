@@ -75,6 +75,11 @@
                                     Background="Transparent" BorderThickness="0" Foreground="#3A2081"
                                     FontSize="14" Cursor="Hand" Margin="12,0,0,0"
                                     Click="OpenLog_Click" Content="Flagged log"/>
+                            <Button DockPanel.Dock="Right"
+                                    Background="Transparent" BorderThickness="0" Foreground="#3A2081"
+                                    FontSize="14" Cursor="Hand" Margin="12,0,0,0"
+                                    ToolTip="Runs &quot;dont tell ur parents&quot; through Safeguard so you can see the list, the log, and the email."
+                                    Click="TestAlert_Click" Content="Send a test alert"/>
                             <Button x:Name="ClearNeedsLookButton" DockPanel.Dock="Right"
                                     Background="Transparent" BorderThickness="0" Foreground="#3A2081"
                                     FontSize="14" Cursor="Hand"

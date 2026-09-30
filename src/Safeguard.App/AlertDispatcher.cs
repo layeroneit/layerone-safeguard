@@ -39,6 +39,8 @@ public sealed class AlertDispatcher
             Snippet = item.Snippet,
             Category = item.Label,
             TalkItOver = item.TalkItOver,
+            FlaggedWords = item.FlaggedWords(),
+            IsTest = item.IsTest,
             Urgent = item.IsRisk
         });
         _ = SendAsync(copy);
@@ -68,7 +70,7 @@ public sealed class AlertDispatcher
             }
 
             var topic = item.App + "|" + item.Label;
-            if (!item.IsRisk && _lastByTopic.TryGetValue(topic, out var last) && now - last < SameTopicCooldown)
+            if (!item.IsRisk && !item.IsTest && _lastByTopic.TryGetValue(topic, out var last) && now - last < SameTopicCooldown)
             {
                 return false;
             }

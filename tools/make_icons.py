@@ -147,6 +147,7 @@ def trim_wordmark():
 def main():
     save_ico(ROOT / "assets" / "icon" / "app.ico", APP_SIZES)
     mark(256).save(ROOT / "assets" / "icon" / "app-256.png")
+    mark(96).save(ROOT / "assets" / "icon" / "app-96.png")  # email signature
     for name, (tile, ring, dot) in TRAY_STATES.items():
         save_ico(ROOT / "assets" / "tray" / f"{name}.ico", TRAY_SIZES, tile=tile, ring=ring, dot=dot)
     trim_wordmark()

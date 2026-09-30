@@ -19,7 +19,7 @@ public sealed class Flagger
         _scorer = scorer;
     }
 
-    public FlaggedItem? Check(string app, string? text, DateTimeOffset time)
+    public FlaggedItem? Check(string app, string? text, DateTimeOffset time, bool isTest = false)
     {
         var result = _scorer.Score(text);
         if (result.Level == ScoreLevel.Clear)
@@ -33,7 +33,7 @@ public sealed class Flagger
             .Distinct()
             .Where(key => !_seen.Contains(key))
             .ToList();
-        if (fresh.Count == 0)
+        if (fresh.Count == 0 && !isTest)
         {
             return null;
         }
@@ -53,8 +53,9 @@ public sealed class Flagger
             Label = top.Category.Label,
             Snippet = top.Line,
             TalkItOver = top.Category.TalkItOver,
-            Lines = result.Hits.Select(h => new FlaggedLine(h.Category.Id, h.Phrase, h.Line)).ToList(),
-            Context = text ?? ""
+            Lines = result.Hits.OrderByDescending(h => h.Points).Select(h => new FlaggedLine(h.Category.Id, h.Phrase, h.Line, h.Matched)).ToList(),
+            Context = text ?? "",
+            IsTest = isTest
         };
     }
 

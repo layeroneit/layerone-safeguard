@@ -29,7 +29,16 @@ public sealed record FlaggedItem
     /// <summary>The whole read the flag came from (one chat window read), for context.</summary>
     public string Context { get; init; } = "";
 
+    /// <summary>The exact words that set off the flag, strongest first, no repeats.</summary>
+    public IReadOnlyList<string> FlaggedWords() =>
+        Lines.Select(l => string.IsNullOrWhiteSpace(l.Matched) ? l.Phrase : l.Matched)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+    /// <summary>Started from the "Send a test alert" button. Not real chat.</summary>
+    public bool IsTest { get; init; }
+
     public bool IsRisk => Level.Equals("Risk", StringComparison.OrdinalIgnoreCase);
 }
 
-public sealed record FlaggedLine(string Category, string Phrase, string Line);
+public sealed record FlaggedLine(string Category, string Phrase, string Line, string Matched = "");

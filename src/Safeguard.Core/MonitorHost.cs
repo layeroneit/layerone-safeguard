@@ -182,12 +182,30 @@ public sealed class MonitorHost
         });
     }
 
-    private void Consider(string app, string text, DateTimeOffset now)
+    /// <summary>The line the "Send a test alert" button uses. Safe to say out loud; clearly a warning sign.</summary>
+    public const string TestLine = "dont tell ur parents";
+
+    /// <summary>Runs the test line through the real path: score, list, log, email.</summary>
+    public FlaggedItem? RunTestAlert()
     {
-        var item = _flagger.Check(app, text, now);
+        var item = Consider("Safeguard test", TestLine, DateTimeOffset.UtcNow, isTest: true);
+        if (item is not null)
+        {
+            lock (_gate)
+            {
+                _snapshot = _snapshot with { NeedsLook = _needsLook.ToArray() };
+            }
+        }
+
+        return item;
+    }
+
+    private FlaggedItem? Consider(string app, string text, DateTimeOffset now, bool isTest = false)
+    {
+        var item = _flagger.Check(app, text, now, isTest);
         if (item is null)
         {
-            return;
+            return null;
         }
 
         try
@@ -209,6 +227,7 @@ public sealed class MonitorHost
         }
 
         Flagged?.Invoke(item);
+        return item;
     }
 
     private IReadOnlyList<FlaggedItem> NeedsLookCopy()

@@ -19,6 +19,12 @@ public sealed class AlertMessage
     /// <summary>Optional calm suggestion for how to bring it up with the child.</summary>
     public string? TalkItOver { get; init; }
 
+    /// <summary>The exact words that set off the alert, shown as [tags].</summary>
+    public IReadOnlyList<string> FlaggedWords { get; init; } = Array.Empty<string>();
+
+    /// <summary>Started by the parent from the app to check alerts. Not real chat.</summary>
+    public bool IsTest { get; init; }
+
     /// <summary>Several warning signs at once. Adds a line about getting help now.</summary>
     public bool Urgent { get; init; }
 }

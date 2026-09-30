@@ -10,7 +10,8 @@ public enum ScoreLevel
 }
 
 /// <param name="Line">The line as it was read, for the parent snippet.</param>
-public sealed record PhraseHit(Category Category, string Phrase, string Line, bool Weak)
+/// <param name="Matched">The words that matched, after clean-up (e.g. "dont tell your parents").</param>
+public sealed record PhraseHit(Category Category, string Phrase, string Line, bool Weak, string Matched = "")
 {
     public int Points => Weak ? 1 : Category.Weight;
 }
@@ -72,9 +73,10 @@ public sealed class PhraseScorer
             normalized += " ";
             foreach (var (category, phrase, pattern, weak) in _patterns)
             {
-                if (pattern.IsMatch(normalized))
+                var match = pattern.Match(normalized);
+                if (match.Success)
                 {
-                    hits.Add(new PhraseHit(category, phrase, line.Trim(), weak));
+                    hits.Add(new PhraseHit(category, phrase, line.Trim(), weak, match.Value.Trim()));
                 }
             }
         }
