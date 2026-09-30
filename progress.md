@@ -8,7 +8,10 @@ Icons: Safeguard mark (violet tile, Layer One gradient ring, white shield) built
 
 Blockers: none for capture APIs. Discord Friends chrome and Roblox home UI both returned text. Open a Discord text channel and in-game chat for a tighter read.
 
+Later the same day: phrase taxonomy v1 + on-device scorer (40 synthetic tests green), "Needs a look" list with talk-it-over tips, encrypted flagged-only log + viewer, email setup on first run with required test email, alert emails with cooldown, turned-off email, kids info window, PARENTS.md.
+
 Next:
-1. Open a Discord text channel and in-game Roblox chat to tighten reads.
-2. Parent mail wizard (test email).
-3. Phrase scoring + alerts.
+1. Parent runs the email setup and confirms the test email arrives.
+2. Open a Discord text channel and in-game Roblox chat; confirm "Last text" updates and a synthetic phrase shows in Needs a look.
+3. Day 2: filter to the child's usernames.
+4. Installer (Inno Setup).

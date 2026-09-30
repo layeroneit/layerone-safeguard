@@ -22,6 +22,10 @@ public static class AlertCopyWriter
         var subject = about is null
             ? $"{Colors.ShortName} notice: something in {app} to review"
             : $"{Colors.ShortName} notice: something in {app} about {about}";
+        if (message.Urgent)
+        {
+            subject = subject.Replace($"{Colors.ShortName} notice:", $"{Colors.ShortName} notice (please look soon):");
+        }
 
         var body = new StringBuilder();
         body.AppendLine("Hello,");
@@ -47,6 +51,20 @@ public static class AlertCopyWriter
         body.Append(snippet);
         body.AppendLine("\"");
         body.AppendLine();
+        var tip = OptionalLine(message.TalkItOver);
+        if (tip is not null)
+        {
+            body.AppendLine("A calm way to bring it up:");
+            body.AppendLine(tip);
+            body.AppendLine();
+        }
+
+        if (message.Urgent)
+        {
+            body.AppendLine("Safeguard saw more than one warning sign together. If you think your child is in danger right now, call 911.");
+            body.AppendLine();
+        }
+
         body.AppendLine("Safeguard only sends a notice. It does not block or delete anything. You decide what to do next.");
         body.AppendLine();
         body.AppendLine(Colors.ShortName);

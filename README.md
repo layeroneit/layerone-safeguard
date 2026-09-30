@@ -1,5 +1,7 @@
 # LayerOne App Safeguard
 
+> 👪 **Parents: start with [PARENTS.md](PARENTS.md).** It explains what Safeguard does in plain English.
+
 **Publisher:** Layer One IT Consultants LLC  
 **License:** Freeware. Provided **AS-IS, NO WARRANTY**. See `LICENSE.txt`.  
 **Platform:** Windows 10/11 (x64)
@@ -61,7 +63,23 @@ dotnet run --project src\Safeguard.App\Safeguard.App.csproj
 
 A simple window and a tray icon. First run asks you to accept the AS-IS notice. After that, Safeguard starts when you sign in. It rests until Discord or Roblox is open. Closing the window hides it to the tray; use Quit in the tray menu to stop.
 
-Mail setup (the rest of the wizard) is still next.
+First run: AS-IS notice, then **Email alerts** (your address, app password, optional second parent, test email must go through before Finish). Change it later from the main window or tray.
+
+## Phrases and scoring
+
+`phrases/taxonomy.v1.json` is the versioned list of warning-sign behaviours (personal info, moving apps, secrecy, trust-building, meeting, photo requests). Each category has a parent-facing label and a **talk-it-over** line used in the app and email. Scoring runs on-device (`src/Safeguard.Scoring`). Tests are synthetic only:
+
+```powershell
+dotnet test tests\Safeguard.Scoring.Tests
+```
+
+## Flagged log
+
+Only reads that score "needs a look" or higher are written, DPAPI-encrypted to the Windows account, one file per day under `%LOCALAPPDATA%\LayerOne\Safeguardlagged`, pruned after 30 days. View it from **Flagged log** in the main window.
+
+## Icons
+
+`python tools/make_icons.py` rebuilds `assets/icon/app.ico`, the header mark, and the tray state icons from the Layer One palette.
 
 ## M0 spike
 

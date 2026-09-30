@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "updated": "2026-09-29",
+  "notes": [
+    "Behaviour patterns, not word lists. No slurs, no explicit material.",
+    "Phrase syntax: words separated by spaces. a|b = either word. * = up to three other words.",
+    "Text is lower-cased, apostrophes dropped, common leetspeak and chat shorthand (u, ur, r, pls) expanded before matching.",
+    "phrases score the category weight. weak phrases score 1.",
+    "A block is one read of a chat window. Combos add a bonus when two categories show up in the same block.",
+    "Tests must stay synthetic. Never add real chat logs here."
+  ],
+  "sources": [
+    "NCMEC NetSmartz: online enticement and grooming warning signs",
+    "CEOP / Thinkuknow (UK): grooming stages, secrecy and platform moves",
+    "Discord Family Center and Safety Center guidance for parents",
+    "Roblox Safety and Parental Controls guidance (Robux lures, off-platform moves)",
+    "Common Sense Media: talking with kids about online strangers"
+  ],
+  "thresholds": {
+    "review": 3,
+    "risk": 7
+  },
+  "combos": [
+    { "categories": [ "secrecy", "meeting" ], "bonus": 3 },
+    { "categories": [ "secrecy", "sexual" ], "bonus": 3 },
+    { "categories": [ "secrecy", "migration" ], "bonus": 2 },
+    { "categories": [ "pii", "meeting" ], "bonus": 2 },
+    { "categories": [ "grooming", "meeting" ], "bonus": 2 },
+    { "categories": [ "grooming", "sexual" ], "bonus": 2 }
+  ],
+  "categories": [
+    {
+      "id": "pii",
+      "label": "personal information",
+      "weight": 2,
+      "talkItOver": "Ask who they were chatting with and whether they know that person in real life. A simple family rule helps: school, address, phone number, and last name stay private online.",
+      "phrases": [
+        "what school * you go to",
+        "which school * you go to",
+        "where do you live",
+        "what city|town * you live in",
+        "what is your address|addy",
+        "whats your address|addy",
+        "send * your address|addy",
+        "whats your number",
+        "what is your number",
+        "give me your number",
+        "send * your number",
+        "your phone number",
+        "whats your real name",
+        "what is your real name",
+        "whats your last name",
+        "asl"
+      ],
+      "weak": [
+        "how old are you",
+        "what grade are you in"
+      ]
+    },
+    {
+      "id": "migration",
+      "label": "moving the chat to another app",
+      "weight": 2,
+      "talkItOver": "Ask if someone wanted to move the chat to a different app. People who push to switch apps are often trying to get away from the game's safety tools. It is always okay to say no.",
+      "phrases": [
+        "add me on snap|snapchat|insta|instagram|whatsapp|telegram|kik|tiktok|signal",
+        "whats your snap|snapchat|insta|instagram|whatsapp|telegram|kik",
+        "what is your snap|snapchat|insta|instagram|whatsapp|telegram|kik",
+        "text me",
+        "download * telegram|kik|whatsapp|signal|wickr",
+        "lets talk somewhere else",
+        "lets talk on another app",
+        "move * to snap|snapchat|telegram|whatsapp|kik",
+        "message me privately",
+        "talk in private"
+      ],
+      "weak": [
+        "go to dms",
+        "dm me"
+      ]
+    },
+    {
+      "id": "secrecy",
+      "label": "keeping secrets from parents",
+      "weight": 3,
+      "talkItOver": "Let them know that no one online should ask them to keep secrets from you, and that they will not be in trouble for telling you about it.",
+      "phrases": [
+        "dont tell your parents|mom|dad|mum|family",
+        "dont tell anyone",
+        "keep * secret",
+        "our secret",
+        "our little secret",
+        "just between us",
+        "between you and me",
+        "nobody needs to know",
+        "no one needs to know",
+        "delete * messages|chat|chats|this|these|convo",
+        "hide * from your parents|mom|dad|mum",
+        "clear your history",
+        "can your parents see",
+        "do your parents check your phone|messages|chats"
+      ],
+      "weak": [
+        "i wont tell"
+      ]
+    },
+    {
+      "id": "grooming",
+      "label": "someone building trust too fast",
+      "weight": 2,
+      "talkItOver": "Free gifts, lots of flattery, or \"no one gets you like I do\" can be a way to build trust fast. Ask calmly how they know this person and what the person has offered them.",
+      "phrases": [
+        "mature for your age",
+        "nobody understands you like",
+        "no one understands you like",
+        "i understand you better than",
+        "your parents dont understand you",
+        "free robux",
+        "ill give you robux|nitro|vbucks|money",
+        "i can give you robux|nitro|vbucks|money",
+        "i will give you robux|nitro|vbucks|money",
+        "send you * gift card",
+        "are you home alone",
+        "when do your parents get home|back",
+        "is anyone home with you",
+        "do you have a boyfriend|girlfriend"
+      ],
+      "weak": [
+        "you can trust me",
+        "youre special"
+      ]
+    },
+    {
+      "id": "meeting",
+      "label": "meeting in person",
+      "weight": 3,
+      "talkItOver": "Ask about the plan without anger. A clear family rule works well: never meet someone from online without a parent there.",
+      "phrases": [
+        "meet up irl",
+        "meet irl",
+        "meet in person",
+        "meet in real life",
+        "want to meet * irl",
+        "come over to my house|place",
+        "come to my house|place",
+        "ill come to your house|place",
+        "i can pick you up",
+        "where can we meet",
+        "send me your location",
+        "share your location",
+        "what time * get out of school"
+      ],
+      "weak": [
+        "lets meet"
+      ]
+    },
+    {
+      "id": "sexual",
+      "label": "requests for photos or private contact",
+      "weight": 4,
+      "talkItOver": "Stay calm and thank them if they tell you. They are not in trouble. If an adult asked a child for pictures, you can report it to the NCMEC CyberTipline at report.cybertip.org or to local police.",
+      "phrases": [
+        "send me * pic|pics|picture|pictures|photo|photos",
+        "pic|pics|picture|pictures|photo|photos of yourself",
+        "send nudes",
+        "what are you wearing",
+        "take off your",
+        "show me your body",
+        "turn on your cam|camera",
+        "video call * alone",
+        "are you in bed",
+        "are you alone"
+      ],
+      "weak": []
+    }
+  ]
+}

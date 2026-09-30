@@ -15,4 +15,10 @@ public sealed class AlertMessage
 
     /// <summary>Optional plain-language reason, e.g. meeting up.</summary>
     public string? Category { get; init; }
+
+    /// <summary>Optional calm suggestion for how to bring it up with the child.</summary>
+    public string? TalkItOver { get; init; }
+
+    /// <summary>Several warning signs at once. Adds a line about getting help now.</summary>
+    public bool Urgent { get; init; }
 }

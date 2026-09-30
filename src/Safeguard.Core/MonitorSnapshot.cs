@@ -1,6 +1,6 @@
 namespace LayerOne.Safeguard.Core;
 
-public sealed class MonitorSnapshot
+public sealed record MonitorSnapshot
 {
     public bool WatchingEnabled { get; init; }
     public bool DiscordOpen { get; init; }
@@ -14,6 +14,9 @@ public sealed class MonitorSnapshot
     public string? LastText { get; init; }
 
     /// <summary>Lines scored as "needs a look" and not yet dismissed by the parent.</summary>
-    public int NeedsLookCount { get; init; }
+    public int NeedsLookCount => NeedsLook.Count;
+
+    /// <summary>Newest first.</summary>
+    public IReadOnlyList<FlaggedItem> NeedsLook { get; init; } = Array.Empty<FlaggedItem>();
     public DateTimeOffset UpdatedUtc { get; init; } = DateTimeOffset.UtcNow;
 }

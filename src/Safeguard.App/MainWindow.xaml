@@ -67,6 +67,52 @@
                                    Text="Getting ready."/>
                     </StackPanel>
                 </Border>
+                <Border x:Name="NeedsLookCard" Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14"
+                        BorderBrush="#C4841A" BorderThickness="0,0,0,0">
+                    <StackPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right"
+                                    Background="Transparent" BorderThickness="0" Foreground="#3A2081"
+                                    FontSize="14" Cursor="Hand" Margin="12,0,0,0"
+                                    Click="OpenLog_Click" Content="Flagged log"/>
+                            <Button x:Name="ClearNeedsLookButton" DockPanel.Dock="Right"
+                                    Background="Transparent" BorderThickness="0" Foreground="#3A2081"
+                                    FontSize="14" Cursor="Hand"
+                                    Click="ClearNeedsLook_Click" Content="Mark all as seen"/>
+                            <TextBlock x:Name="NeedsLookTitle" Text="Needs a look" FontWeight="SemiBold" Foreground="#1A1033"/>
+                        </DockPanel>
+                        <TextBlock x:Name="NeedsLookEmpty"
+                                   Margin="0,6,0,0" FontSize="14" Foreground="#5C5670" TextWrapping="Wrap"
+                                   Text="Nothing right now. When a chat line looks worth a look, it shows up here with a tip for talking about it."/>
+                        <ItemsControl x:Name="NeedsLookList" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,10" Padding="12,10" CornerRadius="8" Background="#F6F4F8"
+                                            BorderThickness="4,0,0,0" BorderBrush="{Binding Accent}">
+                                        <StackPanel>
+                                            <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#1A1033" TextWrapping="Wrap" Text="{Binding Title}"/>
+                                            <TextBlock FontSize="13" Foreground="#5C5670" Text="{Binding When}"/>
+                                            <TextBlock FontSize="14" Foreground="#1A1033" Margin="0,6,0,0" TextWrapping="Wrap" Text="{Binding Snippet}"/>
+                                            <TextBlock FontSize="13" Foreground="#3A2081" Margin="0,6,0,0" TextWrapping="Wrap" Text="{Binding Tip}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right"
+                                    Background="Transparent" BorderThickness="0" Foreground="#3A2081"
+                                    FontSize="14" Cursor="Hand"
+                                    Click="MailSetup_Click" x:Name="MailSetupButton" Content="Set up"/>
+                            <TextBlock Text="Email alerts" FontWeight="SemiBold" Foreground="#1A1033"/>
+                        </DockPanel>
+                        <TextBlock x:Name="MailStatus" Margin="0,6,0,0" Foreground="#5C5670" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
                 <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
                     <StackPanel>
                         <DockPanel>

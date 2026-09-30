@@ -15,6 +15,14 @@ public sealed class AppSettings
     public string ChildDiscordUsername { get; set; } = "";
     public string ChildRobloxUsername { get; set; } = "";
 
+    // Flagged reads only. Clear reads are never written.
+    public int FlagRetentionDays { get; set; } = 30;
+
+    public MailSettings Mail { get; set; } = new();
+
+    /// <summary>First-run email step was shown (finished or skipped).</summary>
+    public bool MailSetupOffered { get; set; }
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true

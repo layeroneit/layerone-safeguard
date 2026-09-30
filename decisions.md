@@ -66,3 +66,26 @@ Dated entries for LayerOne App Safeguard. Publisher: Layer One IT Consultants LL
   name. We will say that in the parent UI. Blank names still mean watch the app.
 - **Stub only.** Store the two optional names in AppSettings. Do not filter
   capture yet. Empty names must never stop a read.
+
+## 2026-09-29 — Talk-it-over coaching, flagged-only log, email setup first
+
+- **Talk-it-over.** Every phrase category carries one calm, non-punitive line for
+  the parent on how to bring it up. Shown in the app and in the alert email.
+  The goal is a conversation; kids who expect punishment stop telling.
+- **Flagged-only raw log.** Reads that score clear are never written. Flagged
+  reads are stored with matched lines and the on-screen context, DPAPI-encrypted
+  to the Windows account, one file per day, pruned after 30 days. Parent can
+  view and delete it from the app.
+- **Email setup on first run.** Right after the AS-IS notice. Address, app
+  password (DPAPI), optional second parent, test email must succeed before
+  Finish. "Set up later" is allowed; the main window then shows it as not set up.
+- **Mailbox check is advisory.** Safeguard looks for the address on the
+  Microsoft account signed in to Windows and in Outlook profiles. A miss does not
+  block setup; the successful test email is the real proof. (Supersedes the
+  "wizard checks the mailbox is present" wording above if the parent uses Gmail
+  or similar without Outlook.)
+- **Alert pacing.** Same app + same topic waits 30 minutes; "please look soon"
+  always sends; at most 10 emails an hour. Turning watching off sends one
+  "watching was turned off" email.
+- **Tray states.** Resting (no dot), watching (green), needs a look (amber), off (gray).
+- **Kids window.** Tray menu has "What is Safeguard? (for kids)" in child language.

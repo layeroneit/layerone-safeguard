@@ -1,4 +1,5 @@
 using LayerOne.Safeguard.Capture;
+using LayerOne.Safeguard.Scoring;
 
 namespace LayerOne.Safeguard.Core;
 
@@ -9,11 +10,38 @@ public sealed class MonitorHost
     private MonitorSnapshot _snapshot;
     private DateTimeOffset _nextDiscord = DateTimeOffset.MinValue;
     private DateTimeOffset _nextRoblox = DateTimeOffset.MinValue;
+    private readonly Flagger _flagger = new(PhraseScorer.CreateDefault());
+    private readonly List<FlaggedItem> _needsLook = new();
+    private const int NeedsLookLimit = 25;
 
     public MonitorHost(AppSettings settings)
     {
         _settings = settings;
         _snapshot = BuildIdle("Safeguard is starting…", "Getting ready.");
+        FlagLog = new FlagLog(retentionDays: settings.FlagRetentionDays);
+        try
+        {
+            FlagLog.Prune();
+        }
+        catch
+        {
+            // A locked or missing folder should not stop watching.
+        }
+    }
+
+    /// <summary>Raw log of flagged reads only, encrypted to this Windows account.</summary>
+    public FlagLog FlagLog { get; }
+
+    /// <summary>Raised on the watch thread when a new read needs a look.</summary>
+    public event Action<FlaggedItem>? Flagged;
+
+    public void ClearNeedsLook()
+    {
+        lock (_gate)
+        {
+            _needsLook.Clear();
+            _snapshot = _snapshot with { NeedsLook = Array.Empty<FlaggedItem>() };
+        }
     }
 
     public MonitorSnapshot Snapshot
@@ -86,6 +114,7 @@ public sealed class MonitorHost
                 DiscordStatus = discordOpen ? "Discord is open, but watching is off." : discordStatus,
                 RobloxStatus = robloxOpen ? "Roblox is open, but watching is off." : robloxStatus,
                 LastText = null,
+                NeedsLook = NeedsLookCopy(),
                 UpdatedUtc = now
             });
             return;
@@ -99,6 +128,7 @@ public sealed class MonitorHost
             if (!string.IsNullOrWhiteSpace(discordRead.Text))
             {
                 lastText = discordRead.Text;
+                Consider("Discord", discordRead.Text, now);
             }
         }
         else if (settings.WatchDiscord && discordOpen)
@@ -118,6 +148,7 @@ public sealed class MonitorHost
             if (!string.IsNullOrWhiteSpace(robloxRead.Text) && !robloxRead.SkippedUnchanged)
             {
                 lastText = robloxRead.Text;
+                Consider("Roblox", robloxRead.Text, now);
             }
         }
         else if (settings.WatchRoblox && robloxOpen)
@@ -146,8 +177,46 @@ public sealed class MonitorHost
             DiscordStatus = discordStatus,
             RobloxStatus = robloxStatus,
             LastText = lastText,
+            NeedsLook = NeedsLookCopy(),
             UpdatedUtc = now
         });
+    }
+
+    private void Consider(string app, string text, DateTimeOffset now)
+    {
+        var item = _flagger.Check(app, text, now);
+        if (item is null)
+        {
+            return;
+        }
+
+        try
+        {
+            FlagLog.Append(item);
+        }
+        catch
+        {
+            // Keep the on-screen list even if the disk write fails.
+        }
+
+        lock (_gate)
+        {
+            _needsLook.Insert(0, item);
+            if (_needsLook.Count > NeedsLookLimit)
+            {
+                _needsLook.RemoveAt(_needsLook.Count - 1);
+            }
+        }
+
+        Flagged?.Invoke(item);
+    }
+
+    private IReadOnlyList<FlaggedItem> NeedsLookCopy()
+    {
+        lock (_gate)
+        {
+            return _needsLook.ToArray();
+        }
     }
 
     private void Publish(MonitorSnapshot snapshot)

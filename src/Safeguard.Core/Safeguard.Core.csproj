@@ -9,5 +9,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Safeguard.Capture\Safeguard.Capture.csproj" />
     <ProjectReference Include="..\Safeguard.Brand\Safeguard.Brand.csproj" />
+    <ProjectReference Include="..\Safeguard.Scoring\Safeguard.Scoring.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>
 </Project>

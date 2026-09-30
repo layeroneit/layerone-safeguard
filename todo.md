@@ -3,9 +3,11 @@
 ## Core
 
 1. Tighten Discord to a text channel and Roblox to in-game chat.
-2. Mail wizard: admin address, Windows mailbox check, test email.
-3. Phrase scoring + alert email with cooldown.
-4. Installer (Inno Setup) with AS-IS notice.
+2. Live-test email setup (Gmail app password) and one real alert.
+3. Outlook.com: confirm SMTP app-password still works; else add OAuth (MailKit).
+4. Day 2 username filter.
+5. Installer (Inno Setup) with AS-IS notice.
+6. Hide empty provider/found lines in email setup (spacing).
 
 ## UI
 

@@ -14,6 +14,7 @@ public partial class App : Application
     private TaskbarIcon? _tray;
     private MainWindow? _main;
     private MonitorHost? _monitor;
+    private AlertDispatcher? _alerts;
     private AppSettings? _settings;
     private CancellationTokenSource? _cts;
     private Thread? _worker;
@@ -53,6 +54,12 @@ public partial class App : Application
             _settings.Save();
         }
 
+        // Email is how parents hear about anything. Ask once, right after the notice.
+        if (!_settings.MailSetupOffered && !quiet)
+        {
+            new MailSetupWindow(_settings).ShowDialog();
+        }
+
         var exe = Environment.ProcessPath;
         if (!string.IsNullOrWhiteSpace(exe) && LogonStartup.TryRegister(exe, out _))
         {
@@ -61,6 +68,8 @@ public partial class App : Application
         }
 
         _monitor = new MonitorHost(_settings);
+        _alerts = new AlertDispatcher(_settings);
+        _monitor.Flagged += _alerts.OnFlagged;
         _cts = new CancellationTokenSource();
         _worker = new Thread(() => _monitor.Run(_cts.Token))
         {
@@ -70,7 +79,7 @@ public partial class App : Application
         _worker.SetApartmentState(ApartmentState.STA);
         _worker.Start();
 
-        _main = new MainWindow(_settings, _monitor);
+        _main = new MainWindow(_settings, _monitor, _alerts);
         BuildTray();
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -122,7 +131,22 @@ public partial class App : Application
             _settings.WatchingEnabled = !_settings.WatchingEnabled;
             _settings.Save();
             _monitor.Apply(_settings);
+            if (!_settings.WatchingEnabled)
+            {
+                _alerts?.OnWatchingTurnedOff();
+            }
         }));
+        menu.Items.Add(Menu("Email alerts…", (_, _) =>
+        {
+            if (_settings is null)
+            {
+                return;
+            }
+
+            new MailSetupWindow(_settings).ShowDialog();
+            _main?.UpdateMailStatus();
+        }));
+        menu.Items.Add(Menu("What is Safeguard? (for kids)", (_, _) => new KidsInfoWindow().Show()));
         menu.Items.Add(new Separator());
         menu.Items.Add(Menu("Quit Safeguard", (_, _) => Quit()));
 

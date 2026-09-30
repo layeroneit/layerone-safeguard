@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Safeguard.Brand\Safeguard.Brand.csproj" />
     <ProjectReference Include="..\Safeguard.Core\Safeguard.Core.csproj" />
+    <ProjectReference Include="..\Safeguard.Alerts\Safeguard.Alerts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="..\..\assets\logo\layer-one.png" Link="Assets\logo\layer-one.png" />
