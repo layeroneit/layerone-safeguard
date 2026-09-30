@@ -15,5 +15,6 @@
     <ProjectReference Include="..\..\src\Safeguard.Scoring\Safeguard.Scoring.csproj" />
     <ProjectReference Include="..\..\src\Safeguard.Alerts\Safeguard.Alerts.csproj" />
     <ProjectReference Include="..\..\src\Safeguard.Core\Safeguard.Core.csproj" />
+    <ProjectReference Include="..\..\src\Safeguard.Capture\Safeguard.Capture.csproj" />
   </ItemGroup>
 </Project>

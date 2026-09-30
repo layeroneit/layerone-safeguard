@@ -48,17 +48,20 @@ public static class DiscordCapture
             return CaptureRead.Fail("Could not attach to the Discord window.");
         }
 
-        var lines = CollectRawText(root, automation);
+        // A chat is open: read the messages themselves, newest last.
         var chatRoot = FindChatRoot(root);
         if (chatRoot is not null)
         {
-            var chatLines = CollectRawText(chatRoot, automation);
-            if (chatLines.Count > 0)
+            var messages = ReadMessages(chatRoot);
+            if (messages.Count > 0)
             {
-                lines = chatLines;
+                return CaptureRead.OkText(
+                    $"Reading Discord — {target.Title}",
+                    string.Join('\n', messages.TakeLast(MaxMessages)));
             }
         }
 
+        var lines = CollectRawText(root, automation);
         if (lines.Count == 0)
         {
             return CaptureRead.Fail("Discord did not expose any text. Accessibility may be off.");
@@ -73,23 +76,98 @@ public static class DiscordCapture
         }
 
         return CaptureRead.OkText(
-            $"Reading Discord — {target.Title}",
+            "Discord is open. Open a chat or channel to watch messages.",
             preview);
     }
 
+    // Messages on screen passed to scoring each read. Discord keeps roughly this many loaded.
+    private const int MaxMessages = 50;
+
+    // Discord names the list "Messages in <channel or person>".
     private static AutomationElement? FindChatRoot(AutomationElement window)
     {
         try
         {
-            return window.FindFirstDescendant(cf =>
-                cf.ByName("Messages").And(cf.ByControlType(ControlType.List)))
-                ?? window.FindFirstDescendant(cf => cf.ByName("Messages"))
-                ?? window.FindFirstDescendant(cf =>
-                    cf.ByControlType(ControlType.List).And(cf.ByName("Message list")));
+            return window
+                .FindAllDescendants(cf => cf.ByControlType(ControlType.List))
+                .FirstOrDefault(list =>
+                {
+                    var name = SafeName(list);
+                    return name.StartsWith("Messages", StringComparison.OrdinalIgnoreCase)
+                           || name.Equals("Message list", StringComparison.OrdinalIgnoreCase);
+                });
         }
         catch
         {
             return null;
+        }
+    }
+
+    /// <summary>
+    /// One line per message: "Author: text". Discord gives each message a group
+    /// named "Author , text , time"; when that is missing, the message's text nodes are used.
+    /// </summary>
+    private static List<string> ReadMessages(AutomationElement list)
+    {
+        var messages = new List<string>();
+        string? lastAuthor = null;
+        foreach (var item in list.FindAllChildren(cf => cf.ByControlType(ControlType.ListItem)))
+        {
+            try
+            {
+                var group = item.FindFirstChild(cf => cf.ByControlType(ControlType.Group));
+                var parsed = ParseMessageGroup(group is null ? "" : SafeName(group));
+                if (parsed is not null)
+                {
+                    var (author, text) = parsed.Value;
+                    author = string.IsNullOrWhiteSpace(author) ? lastAuthor : author;
+                    lastAuthor = author ?? lastAuthor;
+                    messages.Add(author is null ? Collapse(text) : $"{Collapse(author)}: {Collapse(text)}");
+                    continue;
+                }
+
+                var texts = item.FindAllDescendants(cf => cf.ByControlType(ControlType.Text))
+                    .Select(SafeName)
+                    .Where(t => t.Length > 1)
+                    .ToList();
+                if (texts.Count > 0)
+                {
+                    messages.Add(Collapse(string.Join(' ', texts)));
+                }
+            }
+            catch
+            {
+                // One odd message should not stop the rest.
+            }
+        }
+
+        return messages;
+    }
+
+    /// <summary>"Author , message text , 8:31 PM" -> (Author, message text). Commas inside the text are kept.</summary>
+    public static (string Author, string Text)? ParseMessageGroup(string name)
+    {
+        const string sep = " , ";
+        var first = name.IndexOf(sep, StringComparison.Ordinal);
+        var last = name.LastIndexOf(sep, StringComparison.Ordinal);
+        if (first < 0 || last <= first)
+        {
+            return null;
+        }
+
+        var text = name[(first + sep.Length)..last].Trim();
+        return text.Length == 0 ? null : (name[..first].Trim(), text);
+    }
+
+    private static string SafeName(AutomationElement element)
+    {
+        try
+        {
+            return element.Name ?? "";
+        }
+        catch
+        {
+            return "";
         }
     }
 
