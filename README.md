@@ -11,7 +11,7 @@ admin Windows session. A tray icon stays visible. Flagged snippets are emailed
 through the installing admin’s own mail account. The app never blocks, deletes,
 or acts on its own.
 
-This repository stays **private** until family testing is complete.
+The source is public. Family testing is still underway. The licence is freeware, AS-IS, with no warranty.
 
 ## Locked product rules
 
