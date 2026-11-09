@@ -2,6 +2,7 @@
 
 > 👪 **Parents: start with [PARENTS.md](PARENTS.md).** It explains what Safeguard does in plain English.
 
+Created by **Joseph J. Henderson** · Layer One IT Consultants  
 **Publisher:** Layer One IT Consultants LLC  
 **License:** Freeware. Provided **AS-IS, NO WARRANTY**. See `LICENSE.txt`.  
 **Platform:** Windows 10/11 (x64)
